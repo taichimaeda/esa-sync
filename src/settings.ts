@@ -2,11 +2,13 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import EsaSyncPlugin from "./main";
 
 export interface EsaSyncSettings {
-	mySetting: string;
+	accessToken: string;
+	teamName: string;
 }
 
 export const DEFAULT_ESA_SYNC_SETTINGS: EsaSyncSettings = {
-	mySetting: "default",
+	accessToken: "",
+	teamName: "",
 };
 
 export class EsaSyncSettingTab extends PluginSettingTab {
@@ -23,14 +25,27 @@ export class EsaSyncSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Setting #1")
-			.setDesc("It's a secret")
+			.setName("Team name")
+			.setDesc("The name of the team you want to sync with")
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter your secret")
-					.setValue(this.plugin.settings.mySetting)
+					.setPlaceholder("Team name")
+					.setValue(this.plugin.settings.teamName)
 					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
+						this.plugin.settings.teamName = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Access Token")
+			.setDesc("Your personal access token for the ESA API")
+			.addText((text) =>
+				text
+					.setPlaceholder("Access Token")
+					.setValue(this.plugin.settings.accessToken)
+					.onChange(async (value) => {
+						this.plugin.settings.accessToken = value;
 						await this.plugin.saveSettings();
 					})
 			);

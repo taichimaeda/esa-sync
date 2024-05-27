@@ -1,4 +1,6 @@
-import { App, Modal, Notice, Plugin } from "obsidian";
+import { addIcon, Notice, Plugin } from "obsidian";
+import { EsaAPIClient } from "./api";
+import esaIcon from "./icons/esa.svg";
 import {
 	DEFAULT_ESA_SYNC_SETTINGS,
 	EsaSyncSettings,
@@ -6,26 +8,27 @@ import {
 } from "./settings";
 
 export default class EsaSyncPlugin extends Plugin {
+	apiClient: EsaAPIClient;
 	settings: EsaSyncSettings;
 
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new EsaSyncSettingTab(this.app, this));
 
-		this.addRibbonIcon("dice", "Sample Plugin", (evt: MouseEvent) => {
-			new Notice("This is a notice!");
-		});
+		this.registerCustomIcons();
 
+		this.apiClient = new EsaAPIClient(this);
+		this.addRibbonIcon("esa", "Sync notes to esa", () => this.handleSync());
 		this.addCommand({
-			id: "open-sample-modal-simple",
-			name: "Open sample modal (simple)",
-			callback: () => {
-				new SampleModal(this.app).open();
-			},
+			id: "sync-notes-to-esa",
+			name: "Sync notes to esa",
+			callback: () => this.handleSync(),
 		});
 	}
 
-	onunload() {}
+	private registerCustomIcons() {
+		addIcon("esa", esaIcon);
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(
@@ -38,20 +41,15 @@ export default class EsaSyncPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-}
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText("Woah!");
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
+	private async handleSync() {
+		try {
+			await this.apiClient.createOrUpdatePosts();
+			new Notice("Successfully synced your notes to esa!");
+			return;
+		} catch (error) {
+			console.error(error);
+			new Notice("Failed to sync notes to esa");
+		}
 	}
 }
