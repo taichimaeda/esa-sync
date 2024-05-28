@@ -34,7 +34,7 @@ export default class EsaSyncPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_ESA_SYNC_SETTINGS,
-			await this.loadData()
+			await this.loadData(),
 		);
 	}
 
@@ -43,13 +43,20 @@ export default class EsaSyncPlugin extends Plugin {
 	}
 
 	private async handleSync() {
+		if (!this.settings.accessToken || !this.settings.teamName) {
+			new Notice(
+				"Please configure your settings before syncing notes to esa",
+			);
+			return;
+		}
+		new Notice("Syncing your notes to esa...");
 		try {
 			await this.apiClient.createOrUpdatePosts();
-			new Notice("Successfully synced your notes to esa!");
-			return;
 		} catch (error) {
 			console.error(error);
 			new Notice("Failed to sync notes to esa");
+			return;
 		}
+		new Notice("Successfully synced your notes to esa!");
 	}
 }
