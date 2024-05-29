@@ -1,4 +1,5 @@
-import { addIcon, Notice, Plugin } from "obsidian";
+import { shell } from "electron";
+import { addIcon, Notice, Plugin, TFile } from "obsidian";
 import { EsaAPIClient } from "./api";
 import esaIcon from "./icons/esa.svg";
 import {
@@ -6,6 +7,14 @@ import {
 	EsaSyncSettings,
 	EsaSyncSettingTab,
 } from "./settings";
+
+export interface EsaSyncFrontMatter {
+	"esa-post-number"?: number;
+	"esa-revision-number"?: number;
+	"esa-wip"?: boolean;
+	"esa-skip"?: boolean;
+	"esa-hash"?: string;
+}
 
 export default class EsaSyncPlugin extends Plugin {
 	apiClient: EsaAPIClient;
@@ -18,12 +27,32 @@ export default class EsaSyncPlugin extends Plugin {
 		this.registerCustomIcons();
 
 		this.apiClient = new EsaAPIClient(this);
+
 		this.addRibbonIcon("esa", "Sync notes to esa", () => this.handleSync());
 		this.addCommand({
 			id: "sync-notes-to-esa",
 			name: "Sync notes to esa",
 			callback: () => this.handleSync(),
 		});
+
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu, file) => {
+				menu.addItem((item) => {
+					item.setTitle("Open in esa").onClick(() =>
+						this.handleOpen(file as TFile),
+					);
+				});
+			}),
+		);
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu, editor, view) => {
+				menu.addItem((item) => {
+					item.setTitle("Open in esa").onClick(() =>
+						this.handleOpen(view.file as TFile),
+					);
+				});
+			}),
+		);
 	}
 
 	private registerCustomIcons() {
@@ -58,5 +87,17 @@ export default class EsaSyncPlugin extends Plugin {
 			return;
 		}
 		new Notice("Successfully synced your notes to esa!");
+	}
+
+	private async handleOpen(file: TFile) {
+		// Read frontmatter
+		let frontmatter: EsaSyncFrontMatter = {};
+		await this.app.fileManager.processFrontMatter(file, (value) => {
+			frontmatter = value;
+		});
+
+		const teamName = this.settings.teamName;
+		const postNumber = frontmatter["esa-post-number"];
+		shell.openExternal(`https://${teamName}.esa.io/posts/${postNumber}`);
 	}
 }

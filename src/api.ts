@@ -1,17 +1,9 @@
 import axios from "axios";
 import * as crypto from "crypto";
 import { App, getFrontMatterInfo, Modal, Notice, TFile } from "obsidian";
-import EsaSyncPlugin from "./main";
+import EsaSyncPlugin, { EsaSyncFrontMatter } from "./main";
 // @ts-ignore
 import httpAdapter from "axios/lib/adapters/http.js";
-
-interface EsaSyncFrontMatter {
-	"esa-post-number"?: number;
-	"esa-revision-number"?: number;
-	"esa-wip"?: boolean;
-	"esa-skip"?: boolean;
-	"esa-hash"?: string;
-}
 
 export class EsaAPIClient {
 	constructor(private plugin: EsaSyncPlugin) {}
