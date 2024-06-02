@@ -1,7 +1,7 @@
 {
 	"name": "esa-sync",
 	"version": "1.0.0",
-	"description": "Sync your notes with esa.io",
+	"description": "Sync your notes to esa.io",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

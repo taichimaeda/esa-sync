@@ -2,8 +2,9 @@
 	"id": "esa-sync",
 	"name": "Esa Sync",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "",
+	"minAppVersion": "1.5.7",
+	"description": "Sync your notes to esa.io",
 	"author": "Taichi Maeda",
+	"authorUrl": "https://taichimaeda.github.io",
 	"isDesktopOnly": true
 }
