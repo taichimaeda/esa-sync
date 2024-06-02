@@ -34,7 +34,7 @@ export class EsaSyncSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.teamName = value;
 						await this.plugin.saveSettings();
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -47,7 +47,7 @@ export class EsaSyncSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.accessToken = value;
 						await this.plugin.saveSettings();
-					})
+					}),
 			);
 	}
 }
