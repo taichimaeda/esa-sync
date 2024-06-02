@@ -1,9 +1,9 @@
-import axios from "axios";
-import * as crypto from "crypto";
-import { App, getFrontMatterInfo, Modal, Notice, TFile } from "obsidian";
-import EsaSyncPlugin, { EsaSyncFrontMatter } from "./main";
+import axios from 'axios';
+import * as crypto from 'crypto';
+import { App, getFrontMatterInfo, Modal, Notice, TFile } from 'obsidian';
+import EsaSyncPlugin, { EsaSyncFrontMatter } from './main';
 // @ts-ignore
-import httpAdapter from "axios/lib/adapters/http.js";
+import httpAdapter from 'axios/lib/adapters/http.js';
 
 export class EsaAPIClient {
 	constructor(private plugin: EsaSyncPlugin) {}
@@ -32,12 +32,12 @@ export class EsaAPIClient {
 		for (const file of files) {
 			const promise = (async () => {
 				// Read frontmatter
-				let frontmatter: EsaSyncFrontMatter = {};
+				const frontmatter: EsaSyncFrontMatter = {};
 				await app.fileManager.processFrontMatter(file, (value) => {
 					Object.assign(frontmatter, this.parseFrontmatter(value));
 				});
 
-				const skip = frontmatter["esa-skip"] ?? false;
+				const skip = frontmatter['esa-skip'] ?? false;
 				if (skip) {
 					return;
 				}
@@ -47,17 +47,17 @@ export class EsaAPIClient {
 					.slice(getFrontMatterInfo(body).contentStart)
 					.trim();
 
-				const hash = frontmatter["esa-hash"] ?? "";
+				const hash = frontmatter['esa-hash'] ?? '';
 				const newHash = crypto
-					.createHash("sha256")
+					.createHash('sha256')
 					.update(content)
-					.digest("hex");
+					.digest('hex');
 				if (hash === newHash) {
 					return;
 				}
 
-				const postNumber = frontmatter["esa-post-number"];
-				const revisionNumber = frontmatter["esa-revision-number"];
+				const postNumber = frontmatter['esa-post-number'];
+				const revisionNumber = frontmatter['esa-revision-number'];
 				if (postNumber === undefined && revisionNumber === undefined) {
 					// Do not await
 					await this.createPost(file, content, frontmatter);
@@ -72,7 +72,7 @@ export class EsaAPIClient {
 				await app.fileManager.processFrontMatter(file, (value) => {
 					Object.assign(value, {
 						...frontmatter,
-						"esa-hash": newHash,
+						'esa-hash': newHash,
 					});
 				});
 			})();
@@ -86,29 +86,28 @@ export class EsaAPIClient {
 		modal.open();
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private parseFrontmatter(value: any): EsaSyncFrontMatter {
-		const postNumber = value["esa-post-number"];
-		const revisionNumber = value["esa-revision-number"];
-		const skip = value["esa-skip"];
-		const wip = value["esa-wip"];
+		const postNumber = value['esa-post-number'];
+		const revisionNumber = value['esa-revision-number'];
+		const skip = value['esa-skip'];
+		const wip = value['esa-wip'];
 
 		if (postNumber !== undefined) {
-			value["esa-post-number"] =
-				typeof postNumber === "number"
-					? postNumber
-					: parseInt(postNumber);
+			value['esa-post-number'] =
+				typeof postNumber === 'number' ? postNumber : parseInt(postNumber);
 		}
 		if (revisionNumber !== undefined) {
-			value["esa-revision-number"] =
-				typeof revisionNumber === "number"
+			value['esa-revision-number'] =
+				typeof revisionNumber === 'number'
 					? revisionNumber
 					: parseInt(revisionNumber);
 		}
 		if (skip !== undefined) {
-			value["esa-skip"] = skip || skip === "true";
+			value['esa-skip'] = skip || skip === 'true';
 		}
 		if (wip !== undefined) {
-			value["esa-wip"] = wip || wip === "true";
+			value['esa-wip'] = wip || wip === 'true';
 		}
 
 		return value;
@@ -125,9 +124,9 @@ export class EsaAPIClient {
 			match[0].slice(1),
 		);
 		const category = file.path;
-		const wip = frontmatter["esa-wip"] ?? false;
+		const wip = frontmatter['esa-wip'] ?? false;
 
-		const response = await this.axios.post("/posts", {
+		const response = await this.axios.post('/posts', {
 			post: {
 				name,
 				body_md: content,
@@ -138,8 +137,8 @@ export class EsaAPIClient {
 		});
 
 		Object.assign(frontmatter, {
-			"esa-post-number": response.data.number,
-			"esa-revision-number": response.data.revision_number,
+			'esa-post-number': response.data.number,
+			'esa-revision-number': response.data.revision_number,
 		});
 	}
 
@@ -154,9 +153,9 @@ export class EsaAPIClient {
 			match[0].slice(1),
 		);
 		const category = file.path;
-		const wip = frontmatter["esa-wip"] ?? false;
-		const postNumber = frontmatter["esa-post-number"];
-		const revisionNumber = frontmatter["esa-revision-number"];
+		const wip = frontmatter['esa-wip'] ?? false;
+		const postNumber = frontmatter['esa-post-number'];
+		const revisionNumber = frontmatter['esa-revision-number'];
 
 		if (postNumber === undefined) {
 			new Notice(`Post number is missing: ${file.path}`);
@@ -179,8 +178,8 @@ export class EsaAPIClient {
 		});
 
 		Object.assign(frontmatter, {
-			"esa-post-number": response.data.number,
-			"esa-revision-number": response.data.revision_number,
+			'esa-post-number': response.data.number,
+			'esa-revision-number': response.data.revision_number,
 		});
 	}
 }
@@ -197,16 +196,16 @@ export class EsaSyncResultModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 
-		contentEl.createEl("h2", { text: "Esa Sync" });
-		contentEl.createEl("p", { text: "Created the following files:" });
-		const createdList = contentEl.createEl("ul");
+		contentEl.createEl('h2', { text: 'Esa Sync' });
+		contentEl.createEl('p', { text: 'Created the following files:' });
+		const createdList = contentEl.createEl('ul');
 		for (const file of this.createdFiles) {
-			createdList.createEl("li", { text: file });
+			createdList.createEl('li', { text: file });
 		}
-		contentEl.createEl("p", { text: "Updated the following files:" });
-		const updatedList = contentEl.createEl("ul");
+		contentEl.createEl('p', { text: 'Updated the following files:' });
+		const updatedList = contentEl.createEl('ul');
 		for (const file of this.updatedFiles) {
-			updatedList.createEl("li", { text: file });
+			updatedList.createEl('li', { text: file });
 		}
 	}
 
