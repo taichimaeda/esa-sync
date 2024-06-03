@@ -37,20 +37,21 @@ export default class EsaSyncPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
-				menu.addItem((item) => {
-					item
-						.setTitle('Open in esa')
-						.onClick(() => this.handleOpen(file as TFile));
-				});
+				if (file instanceof TFile) {
+					menu.addItem((item) => {
+						item.setTitle('Open in esa').onClick(() => this.handleOpen(file));
+					});
+				}
 			}),
 		);
 		this.registerEvent(
 			this.app.workspace.on('editor-menu', (menu, editor, view) => {
-				menu.addItem((item) => {
-					item
-						.setTitle('Open in esa')
-						.onClick(() => this.handleOpen(view.file as TFile));
-				});
+				const file = view.file;
+				if (file !== null && file instanceof TFile) {
+					menu.addItem((item) => {
+						item.setTitle('Open in esa').onClick(() => this.handleOpen(file));
+					});
+				}
 			}),
 		);
 	}
